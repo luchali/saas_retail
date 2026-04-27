@@ -15,5 +15,5 @@ export const router = createBrowserRouter([
     ],
   },
 ], {
-  basename: "/saasretail",
+  basename: "/saas_retail",
 });
