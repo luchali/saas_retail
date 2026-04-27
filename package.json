@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "homepage": "https://luchali.github.io/saasretail",
+  "homepage": "https://luchali.github.io/saas_retail",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

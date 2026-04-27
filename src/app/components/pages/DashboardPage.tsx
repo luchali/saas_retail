@@ -669,7 +669,7 @@ export function DashboardPage() {
                         </div>
                         <div className="flex-1">
                           <p className="text-[9px] text-slate-400 font-extrabold uppercase mb-0.5 tracking-tighter">Synchronization Hook / Production URL</p>
-                          <span className="text-slate-800 text-base font-extrabold tracking-tight">/saasretail/store</span>
+                          <span className="text-slate-800 text-base font-extrabold tracking-tight">/saas_retail/store</span>
                         </div>
                         <Link to="/store" target="_blank" className="flex items-center gap-2.5 text-white font-extrabold text-[11px] uppercase tracking-widest bg-blue-600 px-4 py-2 rounded-xl hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 transition-all active:scale-95 group">
                           Explore Live <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
