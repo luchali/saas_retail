@@ -19,7 +19,7 @@ const productsFilePath = path.join(__dirname, '../app/data/products.json');
 
 app.post('/api/orders', (req, res) => {
     const newOrder = req.body;
-    
+
     fs.readFile(ordersFilePath, 'utf8', (err, data) => {
         let orders = [];
         if (!err && data) {
@@ -29,9 +29,9 @@ app.post('/api/orders', (req, res) => {
                 console.error("Error parsing JSON", e);
             }
         }
-        
+
         orders.unshift(newOrder); // Add to beginning
-        
+
         fs.writeFile(ordersFilePath, JSON.stringify(orders, null, 2), 'utf8', (err) => {
             if (err) {
                 console.error("Error writing file", err);
@@ -44,7 +44,7 @@ app.post('/api/orders', (req, res) => {
 
 app.post('/api/products', (req, res) => {
     const products = req.body;
-    
+
     fs.writeFile(productsFilePath, JSON.stringify(products, null, 2), 'utf8', (err) => {
         if (err) {
             console.error("Error writing products file", err);

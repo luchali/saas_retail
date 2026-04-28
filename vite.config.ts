@@ -16,6 +16,11 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    watch: {
+      ignored: ['**/src/app/data/**'],
+    },
+  },
   resolve: {
     alias: {
       // Alias @ to the src directory
