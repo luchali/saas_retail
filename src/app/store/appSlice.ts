@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import initialOrdersFromFile from '../data/orders.json';
+import initialProductsFromFile from '../data/products.json';
 
 export interface Product {
     id: string;
@@ -70,7 +71,7 @@ const defaultProducts: Product[] = [
 const persistedState = loadFromLocalStorage();
 
 const initialState: AppState = persistedState || {
-    products: defaultProducts,
+    products: initialProductsFromFile as Product[],
     orders: initialOrdersFromFile as Order[],
     cart: [],
     notifications: [
@@ -92,6 +93,24 @@ export const syncOrderToFile = createAsyncThunk(
             return response.ok;
         } catch (e) {
             console.error("Failed to sync order to file", e);
+            return false;
+        }
+    }
+);
+
+// Async thunk to handle product catalog sync
+export const syncProductsToFile = createAsyncThunk(
+    'app/syncProductsToFile',
+    async (products: Product[]) => {
+        try {
+            const response = await fetch('http://localhost:3001/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(products),
+            });
+            return response.ok;
+        } catch (e) {
+            console.error("Failed to sync products to file", e);
             return false;
         }
     }
@@ -146,6 +165,30 @@ const appSlice = createSlice({
         setStoreName: (state, action: PayloadAction<string>) => {
             state.storeName = action.payload;
         },
+        addProduct: (state, action: PayloadAction<Omit<Product, 'id' | 'sales' | 'status'>>) => {
+            const newProduct: Product = {
+                ...action.payload,
+                id: Math.random().toString(36).substr(2, 9),
+                sales: 0,
+                status: 'Active'
+            };
+            state.products.push(newProduct);
+        },
+        updateProduct: (state, action: PayloadAction<Product>) => {
+            const index = state.products.findIndex(p => p.id === action.payload.id);
+            if (index !== -1) {
+                state.products[index] = action.payload;
+            }
+        },
+        deleteProduct: (state, action: PayloadAction<string>) => {
+            state.products = state.products.filter(p => p.id !== action.payload);
+        },
+        archiveProduct: (state, action: PayloadAction<string>) => {
+            const product = state.products.find(p => p.id === action.payload);
+            if (product) {
+                product.status = 'Out of Stock';
+            }
+        },
     },
 });
 
@@ -156,7 +199,10 @@ export const {
     addOrder,
     addNotification,
     markNotificationAsRead,
-    setStoreName
+    setStoreName,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    archiveProduct
 } = appSlice.actions;
-
 export default appSlice.reducer;

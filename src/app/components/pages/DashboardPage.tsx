@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import {
   LayoutDashboard, ShoppingCart, Package, BarChart2, Settings, Bell,
@@ -14,10 +14,16 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
-import {
-  markNotificationAsRead as markAsReadAction,
-  setStoreName as setStoreNameAction
+import { 
+  markNotificationAsRead as markAsReadAction, 
+  setStoreName as setStoreNameAction,
+  addProduct as addProductAction,
+  updateProduct as updateProductAction,
+  deleteProduct as deleteProductAction,
+  archiveProduct as archiveProductAction,
+  syncProductsToFile
 } from '../../store/appSlice';
+import { Product } from "../../store/appSlice";
 
 const salesData = [
   { month: "Aug", revenue: 18400, orders: 142, returns: 8 },
@@ -114,11 +120,60 @@ export function DashboardPage() {
 
   const markNotificationAsRead = (id: string) => dispatch(markAsReadAction(id));
   const setStoreName = (name: string) => dispatch(setStoreNameAction(name));
+  const addProduct = (p: any) => dispatch(addProductAction(p));
+  const updateProduct = (p: any) => dispatch(updateProductAction(p));
+  const deleteProduct = (id: string) => dispatch(deleteProductAction(id));
+  const archiveProduct = (id: string) => dispatch(archiveProductAction(id));
+
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [tempStoreName, setTempStoreName] = useState(storeName);
+  
+  // Product Management State
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productForm, setProductForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    image: '',
+    category: 'Electronics',
+    sku: '',
+    stock: 0
+  });
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Sync products to physical file whenever they change
+  useEffect(() => {
+    dispatch(syncProductsToFile(products) as any);
+  }, [products, dispatch]);
+
+  const handleProductSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingProduct) {
+      updateProduct({ ...editingProduct, ...productForm });
+    } else {
+      addProduct(productForm);
+    }
+    setIsProductModalOpen(false);
+    setEditingProduct(null);
+    setProductForm({ name: '', description: '', price: '', image: '', category: 'Electronics', sku: '', stock: 0 });
+  };
+
+  const openEditModal = (p: Product) => {
+    setEditingProduct(p);
+    setProductForm({
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      image: p.image,
+      category: p.category,
+      sku: p.sku,
+      stock: p.stock
+    });
+    setIsProductModalOpen(true);
+  };
 
   const allOrders = [...contextOrders, ...demoOrders];
   const filteredOrders = activeTab === "all"
@@ -609,6 +664,84 @@ export function DashboardPage() {
             </div>
           )}
 
+          {activeNav === "Products" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-slate-900 text-xl font-bold tracking-tight">Products Catalog</h2>
+                  <p className="text-slate-400 text-xs font-medium">Manage your inventory, prices, and product presentation.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => {
+                      setEditingProduct(null);
+                      setProductForm({ name: '', description: '', price: '', image: '', category: 'Electronics', sku: '', stock: 0 });
+                      setIsProductModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-95 font-bold text-xs"
+                  >
+                    <Plus className="w-4 h-4" /> Add Product
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {products.map((product, i) => (
+                  <motion.div 
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    key={product.id}
+                    className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-500"
+                  >
+                    <div className="aspect-[4/3] relative overflow-hidden">
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute top-3 right-3 flex gap-2">
+                        <button 
+                          onClick={() => openEditModal(product)}
+                          className="w-8 h-8 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center text-slate-600 hover:text-blue-600 shadow-sm cursor-pointer transition-colors"
+                        >
+                          <Settings className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => deleteProduct(product.id)}
+                          className="w-8 h-8 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center text-slate-600 hover:text-rose-600 shadow-sm cursor-pointer transition-colors"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {product.status === 'Out of Stock' && (
+                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center">
+                          <span className="bg-white text-slate-900 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">Archived</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-blue-600 text-[9px] font-black uppercase tracking-widest">{product.category}</span>
+                        <span className="text-slate-400 text-[9px] font-bold font-mono uppercase">{product.sku}</span>
+                      </div>
+                      <h4 className="text-slate-900 font-bold text-sm mb-1 line-clamp-1">{product.name}</h4>
+                      <p className="text-slate-500 text-[10px] line-clamp-2 mb-4 h-7 leading-relaxed font-medium">{product.description}</p>
+                      
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <div>
+                          <p className="text-slate-400 text-[9px] font-bold uppercase tracking-tighter">Price</p>
+                          <p className="text-slate-900 font-black text-sm">{product.price}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-slate-400 text-[9px] font-bold uppercase tracking-tighter">Stock</p>
+                          <p className={`text-xs font-black ${product.stock < 10 ? 'text-rose-500' : 'text-slate-700'}`}>{product.stock} units</p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {activeNav === "Orders" && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -849,6 +982,138 @@ export function DashboardPage() {
           )}
         </main>
       </div>
+      {/* Product Modal */}
+      <AnimatePresence>
+        {isProductModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsProductModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+            >
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 className="text-slate-900 font-bold text-lg">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
+                <button onClick={() => setIsProductModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer">
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+              
+              <form onSubmit={handleProductSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
+                    <input 
+                      required
+                      type="text" 
+                      value={productForm.name}
+                      onChange={(e) => setProductForm({...productForm, name: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      placeholder="e.g. Premium Wireless Headphones"
+                    />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Price</label>
+                    <input 
+                      required
+                      type="text" 
+                      value={productForm.price}
+                      onChange={(e) => setProductForm({...productForm, price: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      placeholder="$149.99"
+                    />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">SKU</label>
+                    <input 
+                      required
+                      type="text" 
+                      value={productForm.sku}
+                      onChange={(e) => setProductForm({...productForm, sku: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      placeholder="SKU-001"
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Image URL</label>
+                    <input 
+                      required
+                      type="text" 
+                      value={productForm.image}
+                      onChange={(e) => setProductForm({...productForm, image: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      placeholder="https://images.unsplash.com/..."
+                    />
+                  </div>
+
+                  <div className="col-span-2 space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
+                    <textarea 
+                      required
+                      rows={3}
+                      value={productForm.description}
+                      onChange={(e) => setProductForm({...productForm, description: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 resize-none"
+                      placeholder="Enter detailed product description..."
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Stock</label>
+                    <input 
+                      required
+                      type="number" 
+                      value={productForm.stock}
+                      onChange={(e) => setProductForm({...productForm, stock: parseInt(e.target.value) || 0})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                    />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
+                    <select 
+                      value={productForm.category}
+                      onChange={(e) => setProductForm({...productForm, category: e.target.value})}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 appearance-none"
+                    >
+                      <option>Electronics</option>
+                      <option>Accessories</option>
+                      <option>Clothing</option>
+                      <option>Home</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-6 flex gap-3">
+                  <button 
+                    type="button"
+                    onClick={() => setIsProductModalOpen(false)}
+                    className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 transition-all cursor-pointer active:scale-95"
+                  >
+                    {editingProduct ? 'Save Changes' : 'Create Product'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

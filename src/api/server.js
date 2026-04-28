@@ -15,6 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const ordersFilePath = path.join(__dirname, '../app/data/orders.json');
+const productsFilePath = path.join(__dirname, '../app/data/products.json');
 
 app.post('/api/orders', (req, res) => {
     const newOrder = req.body;
@@ -38,6 +39,18 @@ app.post('/api/orders', (req, res) => {
             }
             res.status(200).send("Order saved successfully");
         });
+    });
+});
+
+app.post('/api/products', (req, res) => {
+    const products = req.body;
+    
+    fs.writeFile(productsFilePath, JSON.stringify(products, null, 2), 'utf8', (err) => {
+        if (err) {
+            console.error("Error writing products file", err);
+            return res.status(500).send("Error saving products");
+        }
+        res.status(200).send("Products saved successfully");
     });
 });
 
