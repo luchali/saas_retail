@@ -49,15 +49,6 @@ interface AppState {
     storeName: string;
 }
 
-// Helper to save state to localStorage
-const saveToLocalStorage = (state: AppState) => {
-    try {
-        localStorage.setItem('saas_retail_state', JSON.stringify(state));
-    } catch (e) {
-        console.error("Could not save state", e);
-    }
-};
-
 // Helper to load state from localStorage
 const loadFromLocalStorage = (): AppState | undefined => {
     try {
@@ -68,7 +59,7 @@ const loadFromLocalStorage = (): AppState | undefined => {
         return undefined;
     }
 };
-
+// Для того, щоб дані записувалися у фізичний файл, потрібно, щоб у фоні працював сервер. Запускаємо команду: node src/api/server.js
 const defaultProducts: Product[] = [
     { id: '1', name: 'Wireless Headphones Pro', price: '$149.99', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80', description: 'Premium noise-cancelling headphones.', category: 'Electronics', sku: 'SKU-001', stock: 45, sales: 128, status: 'Active' },
     { id: '2', name: 'Smart Watch Band', price: '$34.50', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80', description: 'Durable and stylish.', category: 'Accessories', sku: 'SKU-002', stock: 8, sales: 245, status: 'Low Stock' },
@@ -117,15 +108,12 @@ const appSlice = createSlice({
             } else {
                 state.cart.push({ ...action.payload, quantity: 1 });
             }
-            saveToLocalStorage(state);
         },
         removeFromCart: (state, action: PayloadAction<string>) => {
             state.cart = state.cart.filter(item => item.id !== action.payload);
-            saveToLocalStorage(state);
         },
         clearCart: (state) => {
             state.cart = [];
-            saveToLocalStorage(state);
         },
         addOrder: (state, action: PayloadAction<Order>) => {
             state.orders.unshift(action.payload);
@@ -139,7 +127,6 @@ const appSlice = createSlice({
                 read: false,
                 timestamp: Date.now()
             });
-            saveToLocalStorage(state);
         },
         addNotification: (state, action: PayloadAction<Omit<AppNotification, 'id' | 'time' | 'read' | 'timestamp'>>) => {
             state.notifications.unshift({
@@ -149,30 +136,27 @@ const appSlice = createSlice({
                 read: false,
                 timestamp: Date.now()
             });
-            saveToLocalStorage(state);
         },
         markNotificationAsRead: (state, action: PayloadAction<string>) => {
             const notification = state.notifications.find(n => n.id === action.payload);
             if (notification) {
                 notification.read = true;
             }
-            saveToLocalStorage(state);
         },
         setStoreName: (state, action: PayloadAction<string>) => {
             state.storeName = action.payload;
-            saveToLocalStorage(state);
         },
     },
 });
 
-export const { 
-    addToCart, 
-    removeFromCart, 
-    clearCart, 
-    addOrder, 
-    addNotification, 
-    markNotificationAsRead, 
-    setStoreName 
+export const {
+    addToCart,
+    removeFromCart,
+    clearCart,
+    addOrder,
+    addNotification,
+    markNotificationAsRead,
+    setStoreName
 } = appSlice.actions;
 
 export default appSlice.reducer;

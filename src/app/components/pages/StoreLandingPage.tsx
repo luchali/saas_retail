@@ -82,13 +82,13 @@ export function StoreLandingPage() {
 
     dispatch(addOrderAction(newOrder));
     dispatch(syncOrderToFile(newOrder) as any);
+    dispatch(clearCartAction());
 
     setIsSuccess(true);
     setTimeout(() => {
       setIsSuccess(false);
       setIsOrdering(false);
       setIsCartOpen(false);
-      clearCart();
     }, 3000);
   };
 
