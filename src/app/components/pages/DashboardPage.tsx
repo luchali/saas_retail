@@ -613,7 +613,9 @@ export function DashboardPage() {
                     <h3 className="text-slate-900 text-sm font-bold uppercase tracking-tight">Top Products</h3>
                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-tight">By sales volume this month</p>
                   </div>
-                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-95">
+                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-95"
+                    onClick={() => setActiveNav("Products")}
+                  >
                     <Plus className="w-3.5 h-3.5" /> Add Product
                   </button>
                 </div>

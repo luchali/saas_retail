@@ -31,8 +31,8 @@
     "description": "Perfect for summer.",
     "category": "Clothing",
     "sku": "SKU-003",
-    "stock": 11,
-    "sales": 90,
+    "stock": 70,
+    "sales": 92,
     "status": "Active"
   },
   {
@@ -43,8 +43,8 @@
     "description": "Handmade ceramic pot.",
     "category": "Home",
     "sku": "SKU-004",
-    "stock": 89,
-    "sales": 52,
+    "stock": 88,
+    "sales": 53,
     "status": "Active"
   },
   {
