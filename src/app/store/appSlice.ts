@@ -27,6 +27,7 @@ export interface Order {
     date: string;
     avatar: string;
     timestamp: number;
+    items?: { id: string; quantity: number }[];
 }
 
 export interface CartItem extends Product {
@@ -137,6 +138,26 @@ const appSlice = createSlice({
         addOrder: (state, action: PayloadAction<Order>) => {
             state.orders.unshift(action.payload);
 
+            // Automatically reduce stock and update sales/status
+            if (action.payload.items) {
+                action.payload.items.forEach(item => {
+                    const product = state.products.find(p => p.id === item.id);
+                    if (product) {
+                        product.stock = Math.max(0, product.stock - item.quantity);
+                        product.sales += item.quantity;
+                        
+                        // Update status based on new stock level
+                        if (product.stock === 0) {
+                            product.status = 'Out of Stock';
+                        } else if (product.stock < 10) {
+                            product.status = 'Low Stock';
+                        } else {
+                            product.status = 'Active';
+                        }
+                    }
+                });
+            }
+
             // Add notification
             state.notifications.unshift({
                 id: Math.random().toString(36).substr(2, 9),
@@ -166,18 +187,26 @@ const appSlice = createSlice({
             state.storeName = action.payload;
         },
         addProduct: (state, action: PayloadAction<Omit<Product, 'id' | 'sales' | 'status'>>) => {
+            let status: 'Active' | 'Low Stock' | 'Out of Stock' = 'Active';
+            if (action.payload.stock === 0) status = 'Out of Stock';
+            else if (action.payload.stock < 10) status = 'Low Stock';
+
             const newProduct: Product = {
                 ...action.payload,
                 id: Math.random().toString(36).substr(2, 9),
                 sales: 0,
-                status: 'Active'
+                status
             };
             state.products.push(newProduct);
         },
         updateProduct: (state, action: PayloadAction<Product>) => {
             const index = state.products.findIndex(p => p.id === action.payload.id);
             if (index !== -1) {
-                state.products[index] = action.payload;
+                let status: 'Active' | 'Low Stock' | 'Out of Stock' = 'Active';
+                if (action.payload.stock === 0) status = 'Out of Stock';
+                else if (action.payload.stock < 10) status = 'Low Stock';
+                
+                state.products[index] = { ...action.payload, status };
             }
         },
         deleteProduct: (state, action: PayloadAction<string>) => {

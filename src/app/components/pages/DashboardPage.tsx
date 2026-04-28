@@ -14,8 +14,8 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
-import { 
-  markNotificationAsRead as markAsReadAction, 
+import {
+  markNotificationAsRead as markAsReadAction,
   setStoreName as setStoreNameAction,
   addProduct as addProductAction,
   updateProduct as updateProductAction,
@@ -130,7 +130,7 @@ export function DashboardPage() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [tempStoreName, setTempStoreName] = useState(storeName);
-  
+
   // Product Management State
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productForm, setProductForm] = useState({
@@ -672,7 +672,7 @@ export function DashboardPage() {
                   <p className="text-slate-400 text-xs font-medium">Manage your inventory, prices, and product presentation.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={() => {
                       setEditingProduct(null);
                       setProductForm({ name: '', description: '', price: '', image: '', category: 'Electronics', sku: '', stock: 0 });
@@ -687,7 +687,7 @@ export function DashboardPage() {
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {products.map((product, i) => (
-                  <motion.div 
+                  <motion.div
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -697,14 +697,14 @@ export function DashboardPage() {
                   >
                     <div className="aspect-[4/3] relative overflow-hidden">
                       <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                      <div className="absolute top-3 right-3 flex gap-2">
-                        <button 
+                      <div className="absolute top-3 right-3 flex gap-2 z-10">
+                        <button
                           onClick={() => openEditModal(product)}
                           className="w-8 h-8 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center text-slate-600 hover:text-blue-600 shadow-sm cursor-pointer transition-colors"
                         >
                           <Settings className="w-4 h-4" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => deleteProduct(product.id)}
                           className="w-8 h-8 bg-white/90 backdrop-blur rounded-lg flex items-center justify-center text-slate-600 hover:text-rose-600 shadow-sm cursor-pointer transition-colors"
                         >
@@ -724,7 +724,7 @@ export function DashboardPage() {
                       </div>
                       <h4 className="text-slate-900 font-bold text-sm mb-1 line-clamp-1">{product.name}</h4>
                       <p className="text-slate-500 text-[10px] line-clamp-2 mb-4 h-7 leading-relaxed font-medium">{product.description}</p>
-                      
+
                       <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                         <div>
                           <p className="text-slate-400 text-[9px] font-bold uppercase tracking-tighter">Price</p>
@@ -1005,40 +1005,40 @@ export function DashboardPage() {
                   <X className="w-5 h-5 text-slate-500" />
                 </button>
               </div>
-              
+
               <form onSubmit={handleProductSubmit} className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2 space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
-                    <input 
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       value={productForm.name}
-                      onChange={(e) => setProductForm({...productForm, name: e.target.value})}
+                      onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
                       placeholder="e.g. Premium Wireless Headphones"
                     />
                   </div>
-                  
+
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Price</label>
-                    <input 
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       value={productForm.price}
-                      onChange={(e) => setProductForm({...productForm, price: e.target.value})}
+                      onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
                       placeholder="$149.99"
                     />
                   </div>
-                  
+
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">SKU</label>
-                    <input 
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       value={productForm.sku}
-                      onChange={(e) => setProductForm({...productForm, sku: e.target.value})}
+                      onChange={(e) => setProductForm({ ...productForm, sku: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
                       placeholder="SKU-001"
                     />
@@ -1046,11 +1046,11 @@ export function DashboardPage() {
 
                   <div className="col-span-2 space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Image URL</label>
-                    <input 
+                    <input
                       required
-                      type="text" 
+                      type="text"
                       value={productForm.image}
-                      onChange={(e) => setProductForm({...productForm, image: e.target.value})}
+                      onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
                       placeholder="https://images.unsplash.com/..."
                     />
@@ -1058,11 +1058,11 @@ export function DashboardPage() {
 
                   <div className="col-span-2 space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
-                    <textarea 
+                    <textarea
                       required
                       rows={3}
                       value={productForm.description}
-                      onChange={(e) => setProductForm({...productForm, description: e.target.value})}
+                      onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 resize-none"
                       placeholder="Enter detailed product description..."
                     />
@@ -1070,20 +1070,20 @@ export function DashboardPage() {
 
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Stock</label>
-                    <input 
+                    <input
                       required
-                      type="number" 
+                      type="number"
                       value={productForm.stock}
-                      onChange={(e) => setProductForm({...productForm, stock: parseInt(e.target.value) || 0})}
+                      onChange={(e) => setProductForm({ ...productForm, stock: parseInt(e.target.value) || 0 })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
                     />
                   </div>
-                  
+
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
-                    <select 
+                    <select
                       value={productForm.category}
-                      onChange={(e) => setProductForm({...productForm, category: e.target.value})}
+                      onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 appearance-none"
                     >
                       <option>Electronics</option>
@@ -1095,14 +1095,14 @@ export function DashboardPage() {
                 </div>
 
                 <div className="pt-6 flex gap-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setIsProductModalOpen(false)}
                     className="flex-1 px-6 py-3 border border-slate-200 text-slate-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     className="flex-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-200 transition-all cursor-pointer active:scale-95"
                   >

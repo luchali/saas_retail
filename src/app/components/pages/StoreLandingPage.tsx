@@ -78,6 +78,7 @@ export function StoreLandingPage() {
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       avatar: initials || '??',
       timestamp: Date.now(),
+      items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
     };
 
     dispatch(addOrderAction(newOrder));
