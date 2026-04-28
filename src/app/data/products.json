@@ -19,9 +19,9 @@
     "description": "Durable and stylish.",
     "category": "Accessories",
     "sku": "SKU-002",
-    "stock": 8,
+    "stock": 10,
     "sales": 245,
-    "status": "Low Stock"
+    "status": "Active"
   },
   {
     "id": "3",

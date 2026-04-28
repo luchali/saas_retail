@@ -186,8 +186,9 @@ export function StoreLandingPage() {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="group cursor-pointer"
+              className={`group ${product.stock === 0 ? 'opacity-75' : 'cursor-pointer'}`}
               onClick={() => {
+                if (product.stock === 0) return;
                 addToCart(product);
                 setIsCartOpen(true);
               }}
@@ -196,12 +197,19 @@ export function StoreLandingPage() {
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className={`w-full h-full object-cover transition-transform duration-700 ${product.stock === 0 ? 'grayscale' : 'group-hover:scale-110'}`}
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                <div className="absolute bottom-4 left-4 right-4 bg-white text-slate-900 py-3 rounded-xl font-bold text-xs opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 text-center shadow-lg">
-                  Add to Cart
-                </div>
+                
+                {product.stock === 0 ? (
+                  <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                    <span className="bg-white text-slate-900 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-2xl border border-slate-100">Sold Out</span>
+                  </div>
+                ) : (
+                  <div className="absolute bottom-4 left-4 right-4 bg-white text-slate-900 py-3 rounded-xl font-bold text-xs opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 text-center shadow-lg">
+                    Add to Cart
+                  </div>
+                )}
               </div>
               <div className="flex justify-between items-start">
                 <div>
