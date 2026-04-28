@@ -1,0 +1,35 @@
+[
+  {
+    "customer": "test123",
+    "email": "test123@gmail.com",
+    "phone": "1234567890",
+    "address": "Kharkiv avenue Peremoga",
+    "product": "Smart Watch Band (x2), Wireless Headphones Pro (x1)",
+    "amount": "$218.99",
+    "id": "#ORD-6502",
+    "status": "New",
+    "date": "Apr 28, 2026",
+    "avatar": "T",
+    "timestamp": 1777370969606
+  },
+  {
+    "id": "#ORD-1028",
+    "customer": "Sarah Miller",
+    "product": "Wireless Headphones",
+    "amount": "$149.99",
+    "status": "Delivered",
+    "date": "Mar 22, 2026",
+    "avatar": "SM",
+    "timestamp": 1711104000000
+  },
+  {
+    "id": "#ORD-1027",
+    "customer": "James Chen",
+    "product": "Smart Watch Band",
+    "amount": "$34.50",
+    "status": "Shipped",
+    "date": "Mar 22, 2026",
+    "avatar": "JC",
+    "timestamp": 1711104000000
+  }
+]

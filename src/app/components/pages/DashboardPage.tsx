@@ -12,7 +12,12 @@ import {
   BarChart, Bar, PieChart, Pie, Cell
 } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
-import { useAppContext } from "../../context/AppContext";
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import {
+  markNotificationAsRead as markAsReadAction,
+  setStoreName as setStoreNameAction
+} from '../../store/appSlice';
 
 const salesData = [
   { month: "Aug", revenue: 18400, orders: 142, returns: 8 },
@@ -43,14 +48,14 @@ const categoryData = [
 ];
 
 const demoOrders = [
-  { id: "#ORD-1028", customer: "Sarah Miller", product: "Wireless Headphones", amount: "$149.99", status: "Delivered", date: "Mar 22, 2026", avatar: "SM" },
-  { id: "#ORD-1027", customer: "James Chen", product: "Smart Watch Band", amount: "$34.50", status: "Shipped", date: "Mar 22, 2026", avatar: "JC" },
-  { id: "#ORD-1026", customer: "Olivia Torres", product: "Linen Blouse Set", amount: "$89.00", status: "Processing", date: "Mar 21, 2026", avatar: "OT" },
-  { id: "#ORD-1025", customer: "Daniel Park", product: "Ceramic Plant Pot", amount: "$42.00", status: "Pending", date: "Mar 21, 2026", avatar: "DP" },
-  { id: "#ORD-1024", customer: "Emma Wilson", product: "Skincare Bundle", amount: "$124.00", status: "Delivered", date: "Mar 20, 2026", avatar: "EW" },
-  { id: "#ORD-1023", customer: "Ryan Lee", product: "Leather Wallet", amount: "$65.00", status: "Cancelled", date: "Mar 20, 2026", avatar: "RL" },
-  { id: "#ORD-1022", customer: "Mia Johnson", product: "Yoga Mat Premium", amount: "$78.00", status: "Shipped", date: "Mar 19, 2026", avatar: "MJ" },
-  { id: "#ORD-1021", customer: "Alex Brown", product: "Coffee Grinder Pro", amount: "$210.00", status: "Delivered", date: "Mar 19, 2026", avatar: "AB" },
+  { id: "#ORD-1028", customer: "Sarah Miller", email: "sarah@example.com", phone: "+1 234 567 8901", address: "123 Maple St, NY", product: "Wireless Headphones", amount: "$149.99", status: "Delivered", date: "Mar 22, 2026", avatar: "SM", timestamp: Date.now() - 86400000 },
+  { id: "#ORD-1027", customer: "James Chen", email: "james@example.com", phone: "+1 234 567 8902", address: "456 Oak Ave, CA", product: "Smart Watch Band", amount: "$34.50", status: "Shipped", date: "Mar 22, 2026", avatar: "JC", timestamp: Date.now() - 90000000 },
+  { id: "#ORD-1026", customer: "Olivia Torres", email: "olivia@example.com", phone: "+1 234 567 8903", address: "789 Pine Rd, TX", product: "Linen Blouse Set", amount: "$89.00", status: "Processing", date: "Mar 21, 2026", avatar: "OT", timestamp: Date.now() - 100000000 },
+  { id: "#ORD-1025", customer: "Daniel Park", email: "daniel@example.com", phone: "+1 234 567 8904", address: "321 Elm St, FL", product: "Ceramic Plant Pot", amount: "$42.00", status: "Pending", date: "Mar 21, 2026", avatar: "DP", timestamp: Date.now() - 110000000 },
+  { id: "#ORD-1024", customer: "Emma Wilson", email: "emma@example.com", phone: "+1 234 567 8905", address: "654 Birch Ln, WA", product: "Skincare Bundle", amount: "$124.00", status: "Delivered", date: "Mar 20, 2026", avatar: "EW", timestamp: Date.now() - 120000000 },
+  { id: "#ORD-1023", customer: "Ryan Lee", email: "ryan@example.com", phone: "+1 234 567 8906", address: "987 Cedar Dr, IL", product: "Leather Wallet", amount: "$65.00", status: "Cancelled", date: "Mar 20, 2026", avatar: "RL", timestamp: Date.now() - 130000000 },
+  { id: "#ORD-1022", customer: "Mia Johnson", email: "mia@example.com", phone: "+1 234 567 8907", address: "159 Walnut Ct, GA", product: "Yoga Mat Premium", amount: "$78.00", status: "Shipped", date: "Mar 19, 2026", avatar: "MJ", timestamp: Date.now() - 140000000 },
+  { id: "#ORD-1021", customer: "Alex Brown", email: "alex@example.com", phone: "+1 234 567 8908", address: "753 Ash Blvd, AZ", product: "Coffee Grinder Pro", amount: "$210.00", status: "Delivered", date: "Mar 19, 2026", avatar: "AB", timestamp: Date.now() - 150000000 },
 ];
 
 const demoNotifications = [
@@ -107,7 +112,11 @@ const avatarColors = [
 ];
 
 export function DashboardPage() {
-  const { orders: contextOrders, products, notifications, markNotificationAsRead, storeName, setStoreName } = useAppContext();
+  const dispatch = useDispatch();
+  const { orders: contextOrders, products, notifications, storeName } = useSelector((state: RootState) => state.app);
+
+  const markNotificationAsRead = (id: string) => dispatch(markAsReadAction(id));
+  const setStoreName = (name: string) => dispatch(setStoreNameAction(name));
   const [activeNav, setActiveNav] = useState("Dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -481,25 +490,157 @@ export function DashboardPage() {
                 </div>
               </div>
 
-              {/* Orders Table */}
+              {/* Orders Table - Limited for Dashboard */}
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="px-4 py-4 border-b border-slate-50 bg-slate-50/30">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <h3 className="text-slate-900 text-sm font-bold uppercase tracking-tight">Recent Orders</h3>
+                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-tight mt-0.5">Showing latest {Math.min(filteredOrders.length, 8)} records</p>
+                      </div>
+                      <button onClick={() => setActiveNav("Orders")} className="text-blue-600 text-[10px] font-bold uppercase tracking-widest hover:text-blue-700 transition-colors cursor-pointer flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-lg">
+                        View All <ArrowUpRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-600 border border-blue-100 rounded-xl px-4 py-2 bg-blue-50 hover:bg-blue-100 cursor-pointer shadow-sm transition-all">
+                        <Download className="w-3.5 h-3.5" /> Export
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-50/50">
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Order ID</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Customer</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden md:table-cell">Product</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Amount</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden sm:table-cell">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredOrders.slice(0, 8).map((order, i) => {
+                        const config = statusConfig[order.status] || statusConfig["Pending"];
+                        const StatusIcon = config.icon;
+                        return (
+                          <tr key={order.id} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors cursor-default">
+                            <td className="px-5 py-3.5 text-blue-600 text-xs font-bold">{order.id}</td>
+                            <td className="px-5 py-3.5">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-6 h-6 bg-gradient-to-br ${avatarColors[i % avatarColors.length]} rounded-full flex items-center justify-center shrink-0`}>
+                                  <span className="text-white text-[8px] font-bold">{order.avatar}</span>
+                                </div>
+                                <span className="text-slate-700 text-xs font-semibold">{order.customer}</span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-3.5 text-slate-500 text-xs hidden md:table-cell">{order.product}</td>
+                            <td className="px-5 py-3.5 text-slate-900 text-xs font-bold">{order.amount}</td>
+                            <td className="px-5 py-3.5">
+                              <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full w-fit font-bold ${config.style}`}>
+                                <StatusIcon className="w-2.5 h-2.5" />
+                                {order.status}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3.5 text-slate-400 text-xs hidden sm:table-cell font-medium">{order.date}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Products Table */}
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="px-4 py-4 border-b border-slate-50 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-slate-900 text-sm font-bold uppercase tracking-tight">Top Products</h3>
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-tight">By sales volume this month</p>
+                  </div>
+                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-95">
+                    <Plus className="w-3.5 h-3.5" /> Add Product
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-50/50">
+                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Product Name</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 hidden sm:table-cell">Identity</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Stock</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Price</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 hidden sm:table-cell">Sales</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((product) => (
+                        <tr key={product.sku} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors cursor-default">
+                          <td className="px-5 py-3.5 text-slate-900 text-xs font-bold">{product.name}</td>
+                          <td className="px-5 py-3.5 text-slate-400 text-[10px] hidden sm:table-cell font-mono">{product.sku}</td>
+                          <td className="px-5 py-3.5 text-slate-700 text-xs font-semibold">{product.stock}</td>
+                          <td className="px-5 py-3.5 text-slate-900 text-xs font-bold">{product.price}</td>
+                          <td className="px-5 py-3.5 hidden sm:table-cell">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 bg-slate-100 rounded-full h-1.5 w-16">
+                                <div
+                                  className="bg-blue-500 h-1.5 rounded-full"
+                                  style={{ width: `${(product.sales / 300) * 100}%` }}
+                                />
+                              </div>
+                              <span className="text-slate-500 text-[10px] w-8 font-bold">{product.sales}</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${product.status === "Active" ? "bg-green-50 text-green-600 border border-green-100" :
+                              product.status === "Low Stock" ? "bg-amber-50 text-amber-600 border border-amber-100" :
+                                "bg-red-50 text-red-600 border border-red-100"
+                              }`}>
+                              {product.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeNav === "Orders" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-slate-900 text-xl font-bold tracking-tight">Orders Management</h2>
+                  <p className="text-slate-400 text-xs font-medium">Track, manage and process all incoming orders from SaleFlow landing pages.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button className="flex items-center gap-2 bg-slate-100 text-slate-600 px-4 py-2.5 rounded-xl hover:bg-slate-200 transition-all font-bold text-xs">
+                    <Filter className="w-4 h-4" /> Advanced Filter
+                  </button>
+                  <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-95 font-bold text-xs">
+                    <Download className="w-4 h-4" /> Bulk Export
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="px-4 py-4 border-b border-slate-50 bg-slate-50/30">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-slate-900 text-sm font-bold uppercase tracking-tight">Recent Orders</h3>
-                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-tight mt-0.5">Showing {filteredOrders.length} records</p>
+                      <h3 className="text-slate-900 text-sm font-bold uppercase tracking-tight">All Orders</h3>
+                      <p className="text-slate-400 text-[10px] font-bold uppercase tracking-tight mt-0.5">Total {filteredOrders.length} records found</p>
                     </div>
                     <div className="flex items-center gap-2.5">
                       <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3.5 py-2 group focus-within:border-blue-500 transition-all">
                         <Search className="w-3.5 h-3.5 text-slate-400 group-focus-within:text-blue-500" />
                         <input placeholder="Search orders..." className="bg-transparent text-xs text-slate-700 outline-none w-32 placeholder:text-slate-400 font-medium" />
                       </div>
-                      <button className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 border border-slate-200 rounded-xl px-4 py-2 bg-white hover:bg-slate-50 cursor-pointer shadow-sm transition-all">
-                        <Filter className="w-3.5 h-3.5" /> Filter
-                      </button>
-                      <button className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-blue-600 border border-blue-100 rounded-xl px-4 py-2 bg-blue-50 hover:bg-blue-100 cursor-pointer shadow-sm transition-all">
-                        <Download className="w-3.5 h-3.5" /> Export
-                      </button>
                     </div>
                   </div>
 
@@ -524,101 +665,60 @@ export function DashboardPage() {
                       <tr className="bg-slate-50/50">
                         <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Order ID</th>
                         <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Customer</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden md:table-cell">Product</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Amount</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Product Details</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Total Amount</th>
                         <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden sm:table-cell">Date</th>
+                        <th className="text-left px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Date</th>
                         <th className="text-right px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredOrders.map((order, i) => {
-                        const config = statusConfig[order.status];
+                        const config = statusConfig[order.status] || statusConfig["Pending"];
                         const StatusIcon = config.icon;
                         return (
                           <tr key={order.id} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors cursor-default">
-                            <td className="px-5 py-3.5 text-blue-600 text-xs">{order.id}</td>
+                            <td className="px-5 py-3.5 text-blue-600 text-xs font-bold">{order.id}</td>
                             <td className="px-5 py-3.5">
                               <div className="flex items-center gap-2">
                                 <div className={`w-6 h-6 bg-gradient-to-br ${avatarColors[i % avatarColors.length]} rounded-full flex items-center justify-center shrink-0`}>
-                                  <span className="text-white text-[8px]">{order.avatar}</span>
+                                  <span className="text-white text-[8px] font-bold">{order.avatar}</span>
                                 </div>
-                                <span className="text-slate-700 text-xs">{order.customer}</span>
+                                <div className="flex flex-col">
+                                  <span className="text-slate-700 text-xs font-semibold">{order.customer}</span>
+                                  {typeof order.email === 'string' && <span className="text-[9px] text-slate-400 font-bold">{order.email}</span>}
+                                </div>
                               </div>
                             </td>
-                            <td className="px-5 py-3.5 text-slate-500 text-xs hidden md:table-cell">{order.product}</td>
-                            <td className="px-5 py-3.5 text-slate-900 text-xs">{order.amount}</td>
+                            <td className="px-5 py-3.5 text-slate-500 text-xs font-medium">{order.product}</td>
+                            <td className="px-5 py-3.5 text-slate-900 text-xs font-extrabold">{order.amount}</td>
                             <td className="px-5 py-3.5">
-                              <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full w-fit ${config.style}`}>
+                              <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full w-fit font-bold ${config.style}`}>
                                 <StatusIcon className="w-2.5 h-2.5" />
                                 {order.status}
                               </span>
                             </td>
-                            <td className="px-5 py-3.5 text-slate-400 text-xs hidden sm:table-cell">{order.date}</td>
-                            <td className="px-5 py-3.5">
-                              <button className="text-[10px] text-slate-500 hover:text-blue-600 border border-slate-200 hover:border-blue-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer">
-                                View
+                            <td className="px-5 py-3.5 text-slate-400 text-xs font-bold uppercase">{order.date}</td>
+                            <td className="px-5 py-3.5 text-right">
+                              <button className="text-[10px] text-slate-500 hover:text-blue-600 border border-slate-200 hover:border-blue-200 px-3 py-1 rounded-lg transition-colors cursor-pointer font-bold uppercase tracking-tight">
+                                Details
                               </button>
                             </td>
                           </tr>
                         );
                       })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Products Table (Simplified summary version for dashboard) */}
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-4 py-4 border-b border-slate-50 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-slate-900 text-sm">Top Products</h3>
-                    <p className="text-slate-400 text-[10px]">By sales volume this month</p>
-                  </div>
-                  <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-95">
-                    <Plus className="w-3.5 h-3.5" /> Add Product
-                  </button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-slate-50/50">
-                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Product Name</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 hidden sm:table-cell">Identity</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Stock</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Price</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 hidden sm:table-cell">Sales</th>
-                        <th className="text-left px-6 py-4 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {products.map((product) => (
-                        <tr key={product.sku} className="border-t border-slate-50 hover:bg-slate-50/50 transition-colors cursor-default">
-                          <td className="px-5 py-3.5 text-slate-900 text-xs">{product.name}</td>
-                          <td className="px-5 py-3.5 text-slate-400 text-[10px] hidden sm:table-cell">{product.sku}</td>
-                          <td className="px-5 py-3.5 text-slate-700 text-xs">{product.stock}</td>
-                          <td className="px-5 py-3.5 text-slate-900 text-xs">{product.price}</td>
-                          <td className="px-5 py-3.5 hidden sm:table-cell">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-slate-100 rounded-full h-1.5 w-16">
-                                <div
-                                  className="bg-blue-500 h-1.5 rounded-full"
-                                  style={{ width: `${(product.sales / 300) * 100}%` }}
-                                />
+                      {filteredOrders.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="px-6 py-20 text-center">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center">
+                                <ShoppingCart className="w-6 h-6 text-slate-300" />
                               </div>
-                              <span className="text-slate-500 text-[10px] w-8">{product.sales}</span>
+                              <p className="text-slate-400 text-sm font-bold">No orders found matching your criteria</p>
                             </div>
                           </td>
-                          <td className="px-5 py-3.5">
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${product.status === "Active" ? "bg-green-50 text-green-600 border border-green-100" :
-                              product.status === "Low Stock" ? "bg-amber-50 text-amber-600 border border-amber-100" :
-                                "bg-red-50 text-red-600 border border-red-100"
-                              }`}>
-                              {product.status}
-                            </span>
-                          </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -729,7 +829,7 @@ export function DashboardPage() {
             </motion.div>
           )}
 
-          {activeNav !== "Dashboard" && activeNav !== "Settings" && (
+          {activeNav !== "Dashboard" && activeNav !== "Settings" && activeNav !== "Orders" && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

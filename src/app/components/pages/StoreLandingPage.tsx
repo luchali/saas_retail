@@ -19,11 +19,25 @@ import {
   X,
   Globe
 } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+import { 
+  addToCart as addToCartAction, 
+  removeFromCart as removeFromCartAction, 
+  clearCart as clearCartAction, 
+  addOrder as addOrderAction,
+  syncOrderToFile
+} from '../../store/appSlice';
 import { Link } from 'react-router';
 
 export function StoreLandingPage() {
-  const { products, addOrder, storeName, cart, addToCart, removeFromCart, clearCart } = useAppContext();
+  const dispatch = useDispatch();
+  const { products, storeName, cart } = useSelector((state: RootState) => state.app);
+  
+  const addToCart = (product: any) => dispatch(addToCartAction(product));
+  const removeFromCart = (id: string) => dispatch(removeFromCartAction(id));
+  const clearCart = () => dispatch(clearCartAction());
+  const addOrder = (order: any) => dispatch(addOrderAction(order));
   const [isOrdering, setIsOrdering] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -44,14 +58,30 @@ export function StoreLandingPage() {
     e.preventDefault();
     if (cart.length === 0) return;
 
-    addOrder({
+    const orderId = `#ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+    const initials = formData.customer
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+
+    const newOrder = {
       customer: formData.customer,
       email: formData.email,
       phone: formData.phone,
       address: formData.address,
       product: cart.map(item => `${item.name} (x${item.quantity})`).join(', '),
-      amount: `$${cartTotal.toFixed(2)}`
-    });
+      amount: `$${cartTotal.toFixed(2)}`,
+      id: orderId,
+      status: 'New',
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      avatar: initials || '??',
+      timestamp: Date.now(),
+    };
+
+    dispatch(addOrderAction(newOrder));
+    dispatch(syncOrderToFile(newOrder) as any);
 
     setIsSuccess(true);
     setTimeout(() => {
@@ -141,7 +171,7 @@ export function StoreLandingPage() {
         <div className="flex items-end justify-between mb-12">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Our Collection</h2>
-            <p className="text-slate-500 text-sm">Synchronized with our latest inventory</p>
+            <p className="text-slate-500 text-sm">Найновіші надходження</p>
           </div>
           <button className="text-blue-600 text-sm font-bold flex items-center gap-1 group">
             View All <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
